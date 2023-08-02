@@ -10,11 +10,11 @@ var connection = mysql.createConnection({
   database: process.env.DB,
   port: 3306,
 });
-connection.connect(function (err) {
+connection.connect(function(err) {
   if (err) throw err;
   console.log("Connected!");
 });
-router.get("/cats", async function (req, res, next) {
+router.get("/cats", async function(req, res, next) {
   connection.query("SELECT * FROM Cat", (err, results, fields) => {
     if (err) {
       console.error("Error executing", err);
@@ -22,6 +22,18 @@ router.get("/cats", async function (req, res, next) {
     }
     res.send(results);
   });
+});
+router.get("/catweek", async function(req, res, next) {
+  connection.query(
+    "SELECT * FROM Cat where CatName = 'Phoenix'",
+    (err, results, fields) => {
+      if (err) {
+        console.error("Error executing", err);
+        return;
+      }
+      res.send(results);
+    }
+  );
 });
 
 module.exports = router;
