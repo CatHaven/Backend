@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 var router = express.Router();
 require("dotenv").config();
 
+//connect to database
 var connection = mysql.createConnection({
   host: process.env.HOST,
   user: "root",
@@ -11,11 +12,12 @@ var connection = mysql.createConnection({
   database: process.env.DB,
   port: 3306,
 });
-connection.connect(function (err) {
+connection.connect(function(err) {
   if (err) throw err;
   console.log("Connected!");
 });
-router.get("/cats", async function (req, res, next) {
+//get all cats in db
+router.get("/cats", async function(req, res, next) {
   connection.query("SELECT * FROM Cat", (err, results, fields) => {
     if (err) {
       console.error("Error executing", err);
@@ -24,7 +26,8 @@ router.get("/cats", async function (req, res, next) {
     res.send(results);
   });
 });
-router.get("/cat/:name", async function (req, res, next) {
+//get info on specific cat
+router.get("/cat/:name", async function(req, res, next) {
   connection.query(
     `SELECT * FROM Cat where CatName = '${req.params.name}'`,
     (err, results, fields) => {
@@ -36,7 +39,8 @@ router.get("/cat/:name", async function (req, res, next) {
     }
   );
 });
-router.get("/catweek", async function (req, res, next) {
+//get cat of the week
+router.get("/catweek", async function(req, res, next) {
   connection.query(
     "SELECT * FROM Cat where CatName = 'Phoenix'",
     (err, results, fields) => {
@@ -48,6 +52,7 @@ router.get("/catweek", async function (req, res, next) {
     }
   );
 });
+//utility function for generating auth token
 function generateAuthToken(user) {
   const payload = {
     username: user.username,
@@ -58,7 +63,8 @@ function generateAuthToken(user) {
   return jwt.sign(payload, process.env.KEY);
 }
 
-router.get("/account", async function (req, res, next) {
+//gets account details
+router.get("/account", async function(req, res, next) {
   const token = req.headers.authorization;
   if (!token) {
     return res.status(401);
@@ -67,8 +73,8 @@ router.get("/account", async function (req, res, next) {
   console.log(decoded);
   res.json(decoded);
 });
-
-router.post("/register", async function (req, res, next) {
+//inserts a user into the database
+router.post("/register", async function(req, res, next) {
   const data = req.body;
   connection.query(
     `INSERT INTO users(username, password, email) VALUES ("${data.username}", "${data.password}", "${data.email}")`,
@@ -81,8 +87,8 @@ router.post("/register", async function (req, res, next) {
     }
   );
 });
-
-router.post("/login", async function (req, res, next) {
+//logs in a user and returns a webtoken to be stored
+router.post("/login", async function(req, res, next) {
   const data = req.body;
   connection.query(
     `SELECT * FROM users where username = "${data.username}"`,
